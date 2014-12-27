@@ -48,11 +48,13 @@ class Uploader
      * @param array $config 配置项
      * @param bool $base64 是否解析base64编码，可省略。若开启，则$fileField代表的是base64编码的字符串表单名
      */
-    public function __construct($fileField, $config, $type = "upload")
+    public function __construct($fileField, $config, $type = "upload", $username)
     {
         $this->fileField = $fileField;
         $this->config = $config;
         $this->type = $type;
+        $this->username = $username;
+
         if ($type == "remote") {
             $this->saveRemote();
         } else if($type == "base64") {
@@ -60,6 +62,7 @@ class Uploader
         } else {
             $this->upFile();
         }
+        //error_log($username."\n", 3, "../../my-errors.log");
 
         $this->stateMap['ERROR_TYPE_NOT_ALLOWED'] = iconv('unicode', 'utf-8', $this->stateMap['ERROR_TYPE_NOT_ALLOWED']);
     }
@@ -92,6 +95,7 @@ class Uploader
         $this->fullName = $this->getFullName();
         $this->filePath = $this->getFilePath();
         $this->fileName = $this->getFileName();
+
         $dirname = dirname($this->filePath);
 
         //检查文件大小是否超出限制
@@ -272,6 +276,8 @@ class Uploader
         $format = str_replace("{ii}", $d[5], $format);
         $format = str_replace("{ss}", $d[6], $format);
         $format = str_replace("{time}", $t, $format);
+
+        $format = str_replace("{username}", $this->username, $format);
 
         //过滤文件名的非法自负,并替换文件名
         $oriName = substr($this->oriName, 0, strrpos($this->oriName, '.'));
